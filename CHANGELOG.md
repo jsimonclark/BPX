@@ -1,3 +1,7 @@
+# Unreleased
+
+- Added `ontology/`: an OWL application ontology with one class per BPX parameter, placed under the EMMO domain ontologies for electrochemistry and batteries. `bpx.ttl` is generated from the pydantic schema and the curated `mapping.yaml` by `ontology/generate.py`, and `tests/test_ontology.py` fails when the schema, the mapping and the committed file disagree. rdflib is added to the `dev` extra for those tests.
+
 # [v1.1.1](https://github.com/FaradayInstitution/BPX/releases/tag/v1.1.1)
 
 - Added backward-compatible loading of legacy BPX v0.x files: `parse_bpx_file`, `parse_bpx_obj` and `parse_bpx_str` now detect a v0.x object and convert it to the v1.x schema on a best-effort basis, raising a `UserWarning`. Conversion can be disabled with `convert_legacy=False`. The converter is also exposed directly as `bpx.convert_v0_to_v1` / `bpx.is_legacy_bpx`.

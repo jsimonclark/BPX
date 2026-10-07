@@ -1,0 +1,702 @@
+# Hand-curated input for ontology/generate.py. See ontology/README.md for the rules.
+#
+# classes      One entry per class. 'slots' lists the schema fields it covers, as
+#              "<block>/<BPX key>". Blocks: Cell, Electrolyte, Electrode, Particle,
+#              Separator, Initial conditions, Thermal environment, Degradation.
+#   iri        Minted once by `generate.py --mint`, never edited afterwards.
+#   label      Only when the label generated from the key is not usable.
+#   parent     Domain term (a name under 'terms') the class is a subclass of.
+#   about      Bridge filler: the class is also a subclass of
+#              (isPropertyFor some <about>). A name under 'terms' or a label here.
+#   basis      specific: the parent already says what the quantity is of.
+#              bridged: generic parent plus the bridge restriction.
+#              gap: no adequate domain term; parent is a generic EMMO quantity.
+#   gap        For basis gap: the domain term that is missing and why.
+#   ask        Optional: an upstream term that would replace the parent.
+#   related    Terms emitted as skos:related (e.g. frozen polarity-qualified pairs).
+#   comment    Emitted as rdfs:comment.
+#   elucidation  Only when the schema has no description (or several).
+#   note       Curation note, not emitted.
+# unclassed    Schema fields that get no class, with the reason.
+# open         Blocks whose keys are chosen by the file author.
+# terms        Every external IRI the generator emits, with the released module
+#              that declares it. Checked by `generate.py --verify-terms`.
+
+ontology:
+  title: BPX Application Ontology
+  abstract: >-
+    Classes for the parameters of the Battery Parameter eXchange (BPX) format, one class
+    per schema field, defined under the EMMO domain ontologies for electrochemistry and
+    batteries. Polarity and particle phase are not part of the classes: they follow from
+    where a value sits in a BPX file. Generated from the pydantic schema of the bpx
+    package and a curated mapping table, and versioned with it.
+  license: https://spdx.org/licenses/MIT.html
+  source: https://github.com/FaradayInstitution/BPX
+  bridge_property: isPropertyFor
+  elucidation_property: elucidation
+  imports:
+    - https://w3id.org/emmo/domain/battery/0.20.2/battery
+    - https://w3id.org/emmo/domain/electrochemistry/0.37.2/electrochemistry
+
+annotation_properties:
+  bpxPath:
+    iri: bpx_73649a66_38f7_40ee_a51f_468b5b6049df
+    elucidation: >-
+      Where the value sits in a BPX file: the keys from the top of the file down, joined
+      by "/". A "*" stands for a key the file author chooses, such as the name of a
+      particle phase in a blended electrode, of an active material in a per-material
+      State value, or of a validation experiment. The paths are those of the BPX version
+      given by owl:versionInfo.
+  bpxUnit:
+    iri: bpx_c167e5a9_8c89_42c8_809a_bf27cb66ec66
+    elucidation: >-
+      Unit of the value as written in square brackets in the BPX key, for example
+      "m2.s-1". Keys without a unit hold dimensionless values and have no bpxUnit.
+
+classes:
+  # Cell ------------------------------------------------------------------------------
+  - iri: bpx_b4547966_62e5_4606_9e83_2ca2555939b2
+    slots: ["Cell/Electrode area [m2]"]
+    parent: ElectrodeGeometricSurfaceArea
+    basis: specific
+
+  - iri: bpx_9981070e_71d7_43ad_9a58_fd63a0c14d38
+    slots: ["Cell/External surface area [m2]"]
+    parent: DeviceSurfaceArea
+    basis: specific
+
+  - iri: bpx_9f3873d8_22e7_43ab_9a83_6ca17405c65c
+    slots: ["Cell/Volume [m3]"]
+    parent: DeviceVolume
+    basis: specific
+
+  - iri: bpx_6d352e79_3100_4145_b50e_fb63bfc5a363
+    slots: ["Cell/Number of electrode pairs connected in parallel to make a cell"]
+    label: CellNumberOfElectrodePairsConnectedInParallel
+    parent: NumberOfEntities
+    about: BatteryCell
+    basis: gap
+    gap: >-
+      NumberOfElectrodePairs: how many ElectrodePair units a cell connects in parallel.
+      A sibling of NumberOfCellsConnectedInParallel in domain-electrochemistry; the
+      generic NumberOfEntities cannot say which entities are counted.
+    related: [ElectrodePair, NumberOfCellsConnectedInParallel]
+
+  - iri: bpx_c80cf5e2_bda0_4cd4_b6d9_42a99658ba30
+    slots: ["Cell/Lower voltage cut-off [V]"]
+    parent: LowerVoltageLimit
+    basis: specific
+
+  - iri: bpx_a67c05df_ab9b_4162_9358_f4dfbc52d65e
+    slots: ["Cell/Upper voltage cut-off [V]"]
+    parent: UpperVoltageLimit
+    basis: specific
+
+  - iri: bpx_6e506a2d_19c1_4e37_b0fc_47a896f58b14
+    slots: ["Cell/Nominal cell capacity [A.h]"]
+    label: CellNominalCapacity
+    parent: NominalCapacity
+    basis: specific
+
+  - iri: bpx_6d5d000b_13e5_41f8_8617_3273647fc0e1
+    slots: ["Cell/Reference temperature [K]"]
+    parent: ReferenceThermodynamicTemperature
+    basis: specific
+
+  - iri: bpx_b02f64f5_cae1_4c88_b42b_7d4b1b1a4d50
+    slots: ["Cell/Density [kg.m-3]"]
+    parent: DeviceDensity
+    basis: specific
+
+  - iri: bpx_235b4278_781d_443a_870f_bad63d0f35fd
+    slots: ["Cell/Specific heat capacity [J.K-1.kg-1]"]
+    parent: DeviceLumpedSpecificHeatCapacity
+    basis: specific
+
+  # Electrolyte -----------------------------------------------------------------------
+  - iri: bpx_ee89f482_fa14_4359_a574_e4a5bb48717e
+    slots: ["Electrolyte/Cation transference number"]
+    parent: ChargeCarrierTransportNumber
+    basis: specific
+
+  - iri: bpx_2159562a_6225_4331_b1ba_4c6a23722138
+    slots: ["Electrolyte/Diffusivity [m2.s-1]"]
+    parent: ChargeCarrierDiffusivityInElectrolyte
+    basis: specific
+
+  - iri: bpx_d6bf0ff3_7de4_4b65_8d3a_5e941a4a78b8
+    slots: ["Electrolyte/Diffusivity activation energy [J.mol-1]"]
+    parent: ActivationEnergyOfChargeCarrierDiffusivityInElectrolyte
+    basis: specific
+    note: >-
+      A two-facet compound, but not polarity-qualified and an exact match; BattINFO maps
+      conductivity_activation_energy to the sibling compound the same way.
+
+  - iri: bpx_1767bc07_5e98_4b30_b589_8c12e01d9f1a
+    slots: ["Electrolyte/Conductivity [S.m-1]"]
+    parent: ElectrolyticConductivity
+    basis: specific
+    note: Subclass of IonicConductivity, which BattINFO maps ionic_conductivity to.
+
+  - iri: bpx_c1b18f2e_6705_425a_9dd9_99c03fb98c64
+    slots: ["Electrolyte/Conductivity activation energy [J.mol-1]"]
+    parent: ActivationEnergyOfElectrolyteConductivity
+    basis: specific
+
+  # Electrode (porous electrode level; both electrodes) --------------------------------
+  - iri: bpx_3c30144c_3688_4fab_b13b_db39cabb3367
+    slots: ["Electrode/Thickness [m]"]
+    parent: CoatingThickness
+    about: ElectrodeCoating
+    basis: bridged
+    related: [NegativeElectrodeCoatingThickness, PositiveElectrodeCoatingThickness]
+    note: >-
+      CoatingThickness is elucidated as the thickness "before any additional treatment",
+      yet DryCoatingThickness and CalenderedCoatingThickness are its subclasses, so it is
+      read as the general coating thickness. Worth raising upstream.
+
+  - iri: bpx_888e0a71_759f_463b_ba79_dc979c81160e
+    slots: ["Electrode/Porosity"]
+    parent: Porosity
+    about: ElectrodeCoating
+    basis: bridged
+    related: [NegativeElectrodeCoatingPorosity, PositiveElectrodeCoatingPorosity]
+
+  - iri: bpx_9e796d60_a477_4a93_89f7_54cf1171ee55
+    slots: ["Electrode/Transport efficiency"]
+    parent: RatioQuantity
+    about: ElectrodeCoating
+    basis: gap
+    gap: >-
+      TransportEfficiency (or EffectiveTransportRatio): the ratio of an effective
+      transport coefficient in a porous medium to its bulk value, the inverse MacMullin
+      number. Not BruggemanCoefficient, which is the exponent. Belongs in
+      domain-electrochemistry next to Tortuosity and BruggemanCoefficient, and serves the
+      separator too.
+    related: [BruggemanCoefficient, Tortuosity]
+    comment: >-
+      BPX defines this as the inverse MacMullin number. Under a Bruggeman relation it is
+      commonly taken as the porosity raised to the Bruggeman exponent; that exponent is
+      BruggemanCoefficient, a different quantity.
+
+  - iri: bpx_7774c378_8586_4539_8a93_4102d9f0eedb
+    slots: ["Electrode/Conductivity [S.m-1]"]
+    parent: ElectronicConductivity
+    about: ElectrodeCoating
+    basis: bridged
+    related: [NegativeElectrodeElectronicConductivity, PositiveElectrodeElectronicConductivity]
+
+  # Particle (active material; directly in an electrode or under Particle/<phase>) -----
+  - iri: bpx_b39762e8_a82e_43ce_8c31_fd45bdc087ac
+    slots: ["Particle/Minimum stoichiometry"]
+    parent: MinimumStoichiometricCoefficient
+    about: ActiveMaterial
+    basis: bridged
+    related: [StoichiometricCoefficientAtSOC0, StoichiometricCoefficientAtSOC100]
+    comment: >-
+      In BPX the negative electrode is at its minimum stoichiometry at 0% cell state of
+      charge and the positive electrode at 100% (see bpx.get_electrode_stoichiometries).
+      Which one applies depends on the electrode the value sits in, so this class is not
+      placed under StoichiometricCoefficientAtSOC0 or StoichiometricCoefficientAtSOC100.
+
+  - iri: bpx_55f27412_5009_4a67_8f8c_a7d52e5321ab
+    slots: ["Particle/Maximum stoichiometry"]
+    parent: MaximumStoichiometricCoefficient
+    about: ActiveMaterial
+    basis: bridged
+    related: [StoichiometricCoefficientAtSOC0, StoichiometricCoefficientAtSOC100]
+    comment: >-
+      In BPX the negative electrode is at its maximum stoichiometry at 100% cell state of
+      charge and the positive electrode at 0% (see bpx.get_electrode_stoichiometries).
+      Which one applies depends on the electrode the value sits in, so this class is not
+      placed under StoichiometricCoefficientAtSOC0 or StoichiometricCoefficientAtSOC100.
+
+  - iri: bpx_9b126721_7bd7_42f1_80ea_d17b85aafb08
+    slots: ["Particle/Maximum concentration [mol.m-3]"]
+    parent: MaximumConcentration
+    about: ActiveMaterial
+    basis: bridged
+    related:
+      - NegativeElectrodeActiveMaterialMaximumGuestConcentration
+      - PositiveElectrodeActiveMaterialMaximumGuestConcentration
+
+  - iri: bpx_4e6feb35_e313_488b_bf7d_65bc95b0a899
+    slots: ["Particle/Particle radius [m]"]
+    label: BpxParticleRadius
+    parent: ParticleRadius
+    about: ActiveMaterial
+    basis: bridged
+    related: [NegativeElectrodeActiveMaterialParticleRadius, PositiveElectrodeActiveMaterialParticleRadius]
+    note: ParticleRadius is already a prefLabel in domain-electrochemistry.
+
+  - iri: bpx_ea0b91a7_41c7_4251_86d0_49b9048363fc
+    slots: ["Particle/Surface area per unit volume [m-1]"]
+    parent: VolumetricSurfaceArea
+    about: ActiveMaterial
+    basis: bridged
+    related:
+      - NegativeElectrodeActiveMaterialVolumetricSurfaceArea
+      - PositiveElectrodeActiveMaterialVolumetricSurfaceArea
+
+  - iri: bpx_83a25680_952d_4718_94f1_23282d94f616
+    slots: ["Particle/Diffusivity [m2.s-1]"]
+    parent: DiffusionCoefficient
+    about: ActiveMaterial
+    basis: bridged
+    ask: >-
+      GuestDiffusivity (BattINFO ontology-additions section 10a); once published it
+      replaces DiffusionCoefficient as the parent.
+    note: >-
+      DiffusionCoefficient (ISQ mass diffusivity, a subclass of the echem Diffusivity the
+      frozen pair uses) carries a unit restriction; Diffusivity has none.
+    related: [GuestDiffusivityInNegativeElectrodeActiveMaterial, GuestDiffusivityInPositiveElectrodeActiveMaterial]
+
+  - iri: bpx_6aa6ea59_62bc_40fd_8348_71496314c54f
+    slots: ["Particle/Diffusivity activation energy [J.mol-1]"]
+    parent: ActivationEnergy
+    about: ParticleDiffusivity
+    basis: bridged
+    related:
+      - ActivationEnergyOfGuestDiffusivityInNegativeElectrodeActiveMaterial
+      - ActivationEnergyOfGuestDiffusivityInPositiveElectrodeActiveMaterial
+
+  - iri: bpx_09c00f2c_ca61_4d9f_bf9f_b226babd309e
+    slots: ["Particle/OCP [V]"]
+    label: ParticleOpenCircuitPotential
+    parent: OpenCircuitVoltage
+    about: ActiveMaterial
+    basis: bridged
+    related: [NegativeElectrodeActiveMaterialOpenCircuitVoltage, PositiveElectrodeActiveMaterialOpenCircuitVoltage]
+    note: OpenCircuitVoltage carries OpenCircuitPotential and OCP as altLabels; BattINFO maps ocp to it.
+
+  - iri: bpx_6b890cc1_7aa8_4096_85d3_b73d104eb2a6
+    slots: ["Particle/OCP (delithiation) [V]"]
+    label: ParticleDelithiationOpenCircuitPotential
+    parent: OpenCircuitVoltage
+    about: ActiveMaterial
+    basis: bridged
+    ask: >-
+      No domain term names the branch of a hysteretic open-circuit potential, so the
+      delithiation branch is in the label and elucidation only, not in an axiom.
+
+  - iri: bpx_dc1d8187_ee6e_48cb_b4f5_b8fee0d637d3
+    slots: ["Particle/OCP (lithiation) [V]"]
+    label: ParticleLithiationOpenCircuitPotential
+    parent: OpenCircuitVoltage
+    about: ActiveMaterial
+    basis: bridged
+    ask: >-
+      No domain term names the branch of a hysteretic open-circuit potential, so the
+      lithiation branch is in the label and elucidation only, not in an axiom.
+
+  - iri: bpx_108e594a_bdb6_45db_89e6_d615ae205882
+    slots: ["Particle/OCP hysteresis decay constant"]
+    label: ParticleOpenCircuitPotentialHysteresisDecayConstant
+    parent: ISQDimensionlessQuantity
+    about: ActiveMaterial
+    basis: gap
+    gap: >-
+      A decay constant for the state variable of a single-state OCP hysteresis model.
+      It is specific to one model family, so it may stay in this ontology rather than
+      move to a domain ontology; the ask is at least a generic hysteresis-model quantity
+      to hang it under.
+    comment: Dimensionless, as the BPX key carries no unit.
+
+  - iri: bpx_41715f4c_7be8_424a_ba3d_879c2678a41c
+    slots: ["Particle/Entropic change coefficient [V.K-1]"]
+    parent: TemperatureCoefficientOfTheOpenCircuitVoltage
+    about: ActiveMaterial
+    basis: bridged
+    ask: >-
+      EntropicChangeCoefficient (BattINFO ontology-additions section 10a); once
+      published it replaces TemperatureCoefficientOfTheOpenCircuitVoltage as the parent.
+    related: [NegativeElectrodeEntropicChangeCoefficient, PositiveElectrodeEntropicChangeCoefficient]
+
+  - iri: bpx_e8e01311_0370_4e24_8fcb_d473cef937db
+    slots: ["Particle/Reaction rate constant [mol.m-2.s-1]"]
+    parent: ReactionRateConstant
+    about: ElectrodeReaction
+    basis: bridged
+    related: [NegativeElectrodeReactionRateConstant, PositiveElectrodeReactionRateConstant]
+    comment: >-
+      BPX states this rate constant in mol.m-2.s-1, a normalisation fixed by the BPX
+      standard; ReactionRateConstant itself does not commit to a dimension.
+
+  - iri: bpx_c0bbf7f7_f539_419e_8d03_50f1ef3f1303
+    slots: ["Particle/Reaction rate constant activation energy [J.mol-1]"]
+    parent: ActivationEnergy
+    about: ParticleReactionRateConstant
+    basis: bridged
+    related: [NegativeElectrodeActivationEnergyOfReaction, PostiveElectrodeActivationEnergyOfReaction]
+
+  # Separator ---------------------------------------------------------------------------
+  - iri: bpx_a0faec23_995f_4b2c_ab9c_743dcdc6e808
+    slots: ["Separator/Thickness [m]"]
+    label: BpxSeparatorThickness
+    parent: SeparatorThickness
+    basis: specific
+    note: SeparatorThickness is already a prefLabel in domain-electrochemistry.
+
+  - iri: bpx_70126081_1a21_43a9_8093_15ffcef003a8
+    slots: ["Separator/Porosity"]
+    label: BpxSeparatorPorosity
+    parent: SeparatorPorosity
+    basis: specific
+    note: SeparatorPorosity is already a prefLabel in domain-electrochemistry.
+
+  - iri: bpx_f9b5bb2b_bfa0_4a0a_b78e_943e1e3d2ace
+    slots: ["Separator/Transport efficiency"]
+    parent: RatioQuantity
+    about: Separator
+    basis: gap
+    gap: >-
+      TransportEfficiency, the same missing term as for the electrode: the inverse
+      MacMullin number of a porous medium, not the Bruggeman exponent.
+    related: [BruggemanCoefficient, Tortuosity]
+    comment: >-
+      BPX defines this as the inverse MacMullin number. Under a Bruggeman relation it is
+      commonly taken as the porosity raised to the Bruggeman exponent; that exponent is
+      BruggemanCoefficient, a different quantity.
+
+  # State: Initial conditions -----------------------------------------------------------
+  - iri: bpx_4889e44e_d43d_46f4_b31e_dd305429bb84
+    slots: ["Initial conditions/Initial state-of-charge"]
+    parent: StateOfCharge
+    basis: specific
+    note: >-
+      "Initial" is a fact of the State block (a model initial condition), not a domain
+      concept, so no domain InitialStateOfCharge is asked for.
+
+  - iri: bpx_2ce6e02c_2e84_4f71_904d_09877b38d701
+    slots: ["Initial conditions/Initial temperature [K]"]
+    parent: InititalThermodynamicTemperature
+    basis: specific
+    elucidation: Temperature of the cell at the start of a simulation.
+    note: The parent's prefLabel is misspelled upstream (Initital).
+
+  - iri: bpx_5fc4edb9_a58f_4cd0_85ae_84a48b0b0b57
+    slots: ["Initial conditions/Initial electrolyte concentration [mol.m-3]"]
+    parent: InitialChargeCarrierConcentrationInElectrolyte
+    basis: specific
+
+  - iri: bpx_c6278a39_0f36_47c6_ae22_eb10757f0912
+    slots:
+      - "Initial conditions/Initial hysteresis state: Negative electrode"
+      - "Initial conditions/Initial hysteresis state: Positive electrode"
+    label: InitialHysteresisState
+    parent: ISQDimensionlessQuantity
+    about: ActiveMaterial
+    basis: gap
+    gap: >-
+      HysteresisState: the internal state variable of OCP hysteresis models, which this
+      class fixes at the start of a simulation. Like the decay constant it belongs to a
+      model family and may stay application-level.
+    elucidation: >-
+      Hysteresis state of an electrode, or of each active material in a blended
+      electrode, at the start of a simulation.
+    comment: >-
+      BPX has one key per electrode. The class is polarity-free; the key a value sits
+      under says which electrode it belongs to.
+
+  # State: Thermal environment ----------------------------------------------------------
+  - iri: bpx_f5f4e904_9145_47a0_a660_41210d36a021
+    slots: ["Thermal environment/Ambient temperature [K]"]
+    parent: AmbientThermodynamicTemperature
+    basis: specific
+    elucidation: Temperature of the environment around the cell.
+
+  - iri: bpx_c77e56ae_2af1_47b4_ba01_206b19ec3398
+    slots: ["Thermal environment/Heat transfer coefficient [W.m-2.K-1]"]
+    parent: SurfaceCoefficientOfHeatTransfer
+    about: BatteryCell
+    basis: bridged
+    elucidation: Coefficient of heat transfer between the surface of the cell and its environment.
+
+  # State: Degradation -------------------------------------------------------------------
+  - iri: bpx_1e3ffe8e_8b43_4141_9869_287a5b18a452
+    slots: ["Degradation/LLI"]
+    label: LossOfLithiumInventory
+    alt_labels: [LLI]
+    parent: RatioQuantity
+    about: BatteryCell
+    basis: gap
+    gap: >-
+      LossOfLithiumInventory as a quantity: the fraction of cyclable lithium lost to
+      degradation, one of the standard degradation modes. domain-electrochemistry has
+      capacity loss and capacity fade but no degradation-mode quantities.
+    elucidation: >-
+      Loss of lithium inventory (LLI) of the cell: the fraction of its initial cyclable
+      lithium that has been lost through degradation.
+
+  - iri: bpx_3fb0d88b_5837_4c90_b8f4_818ddafe3ad2
+    slots:
+      - "Degradation/LAM: Negative electrode"
+      - "Degradation/LAM: Positive electrode"
+    label: LossOfActiveMaterial
+    alt_labels: [LAM]
+    parent: RatioQuantity
+    about: ActiveMaterial
+    basis: gap
+    gap: >-
+      LossOfActiveMaterial as a quantity: the fraction of an electrode's active material
+      no longer available for lithium storage, the companion of loss of lithium inventory.
+    elucidation: >-
+      Loss of active material (LAM) of an electrode, or of each active material in a
+      blended electrode: the fraction of the initial active material that is no longer
+      available for lithium storage.
+    comment: >-
+      BPX has one key per electrode. The class is polarity-free; the key a value sits
+      under says which electrode it belongs to.
+
+unclassed:
+  - slots:
+      - "Header/BPX"
+      - "Header/Title"
+      - "Header/Description"
+      - "Header/References"
+      - "Header/Model"
+    reason: File metadata, not parameters.
+  - slots:
+      - "Validation/Time [s]"
+      - "Validation/Current [A]"
+      - "Validation/Voltage [V]"
+      - "Validation/Temperature [K]"
+    reason: >-
+      Measured time series used to check a parameter set, not parameters. Describing
+      them is a job for a data model, not for this ontology.
+
+open:
+  - path: Parameterisation/User-defined
+    reason: Keys are chosen by the file author.
+
+terms:
+  # EMMO properties used by every class.
+  elucidation:
+    iri: https://w3id.org/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9
+    module: https://w3id.org/emmo/1.0.2/mereocausality
+  isPropertyFor:
+    iri: https://w3id.org/emmo#EMMO_b3ddad94_ef7e_4b97_8329_9e7c788dd94d
+    module: https://w3id.org/emmo/1.0.2/perspectives/semiotics
+
+  # Bridge fillers.
+  ActiveMaterial:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-reference
+  BatteryCell:
+    iri: https://w3id.org/emmo/domain/battery#battery_68ed592a_7924_45d0_a108_94d6275d57f0
+    module: https://w3id.org/emmo/domain/battery/0.20.2/reference/battery-reference
+  ElectrodeCoating:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_403c300e_09b9_400b_943b_04e82a3cfb56
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-reference
+  ElectrodeReaction:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2e3e14f9_4cb8_45b2_908e_47eec893dec8
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-reference
+  Separator:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_331e6cca_f260_4bf8_af55_35304fe1bbe0
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-reference
+
+  # Parents.
+  ActivationEnergy:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ActivationEnergyOfChargeCarrierDiffusivityInElectrolyte:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_56de36fe_e8e1_486c_8d29_061ac8d28c13
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ActivationEnergyOfElectrolyteConductivity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8c16cb12_41c1_43bd_9e7c_2eea7b06a1f0
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  AmbientThermodynamicTemperature:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39a44af0_0e1a_4859_b550_bdabad64386e
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ChargeCarrierDiffusivityInElectrolyte:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4c274506_af5b_4ef1_8217_829ffd459f28
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ChargeCarrierTransportNumber:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  CoatingThickness:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3b938708_e7e4_4ac0_a959_9c04306302e7
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  DeviceDensity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea21f71_d1bd_4714_a260_b991e6d4bcf7
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  DeviceLumpedSpecificHeatCapacity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9cba2158_26ba_4dd7_b082_ba66dbb960c7
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  DeviceSurfaceArea:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ccde4e5f_ace4_41d1_b4d8_cbd63e6376e6
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  DeviceVolume:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b4184e46_c53c_47cc_9bfc_186fd77836a5
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  DiffusionCoefficient:
+    iri: https://w3id.org/emmo#EMMO_931a725b_926d_4f60_8955_61fe17fce98b
+    module: https://w3id.org/emmo/1.0.2/disciplines/isq
+  ElectrodeGeometricSurfaceArea:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_fa7790d6_07bb_4b0f_9965_55966828f5f3
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ElectrolyticConductivity:
+    iri: https://w3id.org/emmo#EMMO_e6e7277a_1d40_4be5_a3a9_afd3da53d937
+    module: https://w3id.org/emmo/1.0.2/disciplines/isq
+  ElectronicConductivity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ISQDimensionlessQuantity:
+    iri: https://w3id.org/emmo#EMMO_a66427d1_9932_4363_9ec5_7d91f2bfda1e
+    module: https://w3id.org/emmo/1.0.2/disciplines/isq
+  InitialChargeCarrierConcentrationInElectrolyte:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_098f98dc_e015_4dbd_b358_a7ac3b3ecff3
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  InititalThermodynamicTemperature:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9c9b80a4_a00b_4b91_8e17_3a7831f2bf2f
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  LowerVoltageLimit:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  MaximumConcentration:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_47287d09_6108_45ca_ac65_8b9451b1065e
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  MaximumStoichiometricCoefficient:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_95ef8c3c_62fe_467f_b5d4_dd0cd18a7ea8
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  MinimumStoichiometricCoefficient:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_86324806_4263_4d80_b5af_1a7be844ab5b
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NominalCapacity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NumberOfEntities:
+    iri: https://w3id.org/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5
+    module: https://w3id.org/emmo/1.0.2/disciplines/isq
+  OpenCircuitVoltage:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ParticleRadius:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b92e382f_5109_4f60_ab5e_c89d340419a9
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  Porosity:
+    iri: https://w3id.org/emmo#EMMO_3a6578ac_aee0_43b9_9bc6_1eb208c8c9a9
+    module: https://w3id.org/emmo/1.0.2/disciplines/isq
+  RatioQuantity:
+    iri: https://w3id.org/emmo#EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef
+    module: https://w3id.org/emmo/1.0.2/disciplines/isq
+  ReactionRateConstant:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ReferenceThermodynamicTemperature:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db40df7e_1aa5_49a7_85cb_2aa2c1c70489
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  SeparatorPorosity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a4858e4d_dd3b_48ce_97ba_3eeb8571b633
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  SeparatorThickness:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_47288277_4aed_447e_b659_0c975d031406
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  StateOfCharge:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  SurfaceCoefficientOfHeatTransfer:
+    iri: https://w3id.org/emmo#EMMO_0b3295fa_f4bf_4f83_a603_9d98c03da5bb
+    module: https://w3id.org/emmo/1.0.2/disciplines/isq
+  TemperatureCoefficientOfTheOpenCircuitVoltage:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3bb5ae23_59fa_4bc7_9495_803eb6719f28
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  UpperVoltageLimit:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  VolumetricSurfaceArea:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+
+  # Related only (skos:related). The polarity-qualified ones are frozen upstream and
+  # are never used as parents.
+  ActivationEnergyOfGuestDiffusivityInNegativeElectrodeActiveMaterial:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_86af4487_33c1_4562_a00b_3a8252ffe378
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ActivationEnergyOfGuestDiffusivityInPositiveElectrodeActiveMaterial:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4d69edda_d2fa_40b0_9c1e_52e08debf578
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  BruggemanCoefficient:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_5c34b3b5_c9c4_477d_809a_3f682f995aa9
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  ElectrodePair:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d907805f_678b_4ab6_8b56_59631684f84b
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-reference
+  GuestDiffusivityInNegativeElectrodeActiveMaterial:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_50247e71_75fe_4986_959e_fd06c6be98db
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  GuestDiffusivityInPositiveElectrodeActiveMaterial:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e59188bb_ce66_49f6_84aa_ecb98e76941e
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeActivationEnergyOfReaction:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_fda9539d_5232_471c_8945_b9a8ec7247fe
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeActiveMaterialMaximumGuestConcentration:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e808a26a_5812_49e9_894c_b793c7fe0c38
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeActiveMaterialOpenCircuitVoltage:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0e2f4fe6_570a_4d13_81e9_de1d4f9987af
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeActiveMaterialParticleRadius:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bfe553c2_a63e_49b6_a209_0855dfc39724
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeActiveMaterialVolumetricSurfaceArea:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c5f9b91e_a770_4e9b_837e_fa2a76019111
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeCoatingPorosity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_5cb403c4_4f28_46cb_81c4_21c5c47ef14a
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeCoatingThickness:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cdc91ec0_9fc5_4551_bbd9_6824c2920124
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeElectronicConductivity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_be3da3e2_58a9_4e58_adc2_7336d312717c
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeEntropicChangeCoefficient:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_eac57b09_5cc9_41d7_b2c8_40218d7fd47c
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NegativeElectrodeReactionRateConstant:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c5dcb1a2_f2cf_421a_b8ae_47a88a61fce3
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  NumberOfCellsConnectedInParallel:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_482173dc_7779_4f12_982c_b19f2cda2dac
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeActiveMaterialMaximumGuestConcentration:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c69a9d55_823f_4113_a305_ebc89dde7de3
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeActiveMaterialOpenCircuitVoltage:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_52ab4fdd_f945_4541_9ce6_cd6fd3a05861
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeActiveMaterialParticleRadius:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_58400817_3282_46e5_942e_3a1538631403
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeActiveMaterialVolumetricSurfaceArea:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0a1e73c5_e91b_4365_88d4_1e1f476bf776
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeCoatingPorosity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_7481c4c9_c247_4248_a045_a1077230acba
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeCoatingThickness:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_62f5beeb_6d1e_442a_8048_3ebe08882964
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeElectronicConductivity:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_43f77743_1af6_4a0f_9cc6_285c2a450549
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeEntropicChangeCoefficient:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9d558b56_d3b8_429a_a4e2_d2ffab895e42
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PositiveElectrodeReactionRateConstant:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_404126e0_cb1b_44e4_98dc_2474185767a1
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  PostiveElectrodeActivationEnergyOfReaction:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_56b9cd1f_5397_4385_9292_30d93d9e7a05
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  StoichiometricCoefficientAtSOC0:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f22bd1ec_faca_4335_92a5_a1687154c622
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  StoichiometricCoefficientAtSOC100:
+    iri: https://w3id.org/emmo/domain/electrochemistry#electrochemistry_38ab058e_3912_48c2_a7eb_76d25d000820
+    module: https://w3id.org/emmo/domain/electrochemistry/0.37.2/reference/electrochemistry-quantities
+  Tortuosity:
+    iri: https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8
+    module: https://w3id.org/emmo/1.0.2/disciplines/isq

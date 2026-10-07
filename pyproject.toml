@@ -44,6 +44,7 @@ dev = [
     "pytest",
     "coverage[toml] >= 6.5",
     "devtools",
+    "rdflib",
 ]
 docs = [
     "sphinx>=6",
